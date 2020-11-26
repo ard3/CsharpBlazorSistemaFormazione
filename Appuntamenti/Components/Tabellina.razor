@@ -1,0 +1,28 @@
+﻿<h3>Tabellina del numero @baseMoltiplicazione</h3>
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>Base</th>
+            <th>Moltiplicatore</th>
+            <th>Risultato</th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (int i = 0; i <= ripetizioni; i++)
+        {
+            <tr>
+                <td>@baseMoltiplicazione</td>
+                <td>@i</td>
+                <td>@(baseMoltiplicazione*i)</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    [Parameter]
+    public int baseMoltiplicazione { get; set; }
+    [Parameter]
+    public int ripetizioni { get; set; }
+}

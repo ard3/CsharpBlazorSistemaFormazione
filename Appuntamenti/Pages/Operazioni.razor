@@ -1,0 +1,24 @@
+﻿@page "/operazioni"
+
+<h1>Operazioni</h1>
+
+<p>L'attuale conteggio è di: @conteggio</p>
+
+<button class="btn btn-primary" @onclick="Aggiungi">Incrementa</button>
+<button class="btn btn-warning" @onclick="Sottrai">Decrementa</button>
+
+@code {
+    // private indica che questo codice non sarà accessibile dall'esterno
+    private int conteggio = 0;
+
+    // void non restituisce nessun datatype
+    private void Aggiungi()
+    {
+        conteggio++;
+    }
+
+    private void Sottrai()
+    {
+        conteggio--;
+    }
+}

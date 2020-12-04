@@ -1,4 +1,8 @@
-﻿@page "/impegni"
+﻿@using Newtonsoft.Json;
+@using System.IO;
+@using Appuntamenti.Components;
+
+@page "/impegni"
 
 <h1>Impegni</h1>
 <p>In questa pagina puoi vedere la lista di tutti gli impegni registrati in azienda.</p>
@@ -17,43 +21,69 @@
     <tbody>
         @foreach (Impegno singolo in tutti)
         {
-        <tr>
-            <td>@singolo.Id</td>
-            <td>@singolo.Cliente</td>
-            <td>@singolo.Localita</td>
-            <td>@singolo.Quando</td>
-            <td @onclick="e => CambiaConferma(singolo)">
-                @if (singolo.Confermato)
-                {
-                    <span class="oi oi-check" aria-hidden="true" title="Sì" style="color: green"></span>
-                }
-                else
-                {
-                    <span class="oi oi-circle-x" aria-hidden="true" title="No" style="color: indianred"></span>
-                }
-            </td>
-            <td>@singolo.Assegnatario</td>
-        </tr>
+            <tr>
+                <td>@singolo.Id</td>
+                <td>@singolo.Cliente</td>
+                <td>@singolo.Localita</td>
+                <td>@singolo.Quando</td>
+                <td @onclick="e => CambiaConferma(singolo)">
+                    @if (singolo.Confermato)
+                    {
+                        <span class="oi oi-check" aria-hidden="true" title="Sì" style="color: green"></span>
+                    }
+                    else
+                    {
+                        <span class="oi oi-circle-x" aria-hidden="true" title="No" style="color: indianred"></span>
+                    }
+                </td>
+                <td>@singolo.Assegnatario</td>
+            </tr>
         }
     </tbody>
 </table>
 
 @code {
     // Array semplice
-    private List<Impegno> tutti = new List<Impegno>
-{
-        new Impegno(){ Id = 0, Cliente = "Divani e Divani", Localita = "Firenze", Confermato = true, Quando = new DateTime(2020, 12, 2), Assegnatario = "Daniele" },
-        new Impegno(){ Id = 1, Cliente = "Coop", Localita = "Montevarchi", Confermato = false, Quando = new DateTime(2020, 12, 4), Assegnatario = "Marco" },
-        new Impegno(){ Id = 2, Cliente = "IBM", Localita = "Roma", Confermato = false, Quando = new DateTime(2020, 12, 22), Assegnatario = "Luca" },
-        new Impegno(){ Id = 3, Cliente = "Microsoft", Localita = "Milano", Confermato = true, Quando = new DateTime(2021, 1, 2), Assegnatario = "Francesco" },
-    };
+    //private List<Impegno> tutti = new List<Impegno>
+    //{
+    //    new Impegno(){ Id = 0, Cliente = "Divani e Divani", Localita = "Firenze", Confermato = true, Quando = new DateTime(2020, 12, 2), Assegnatario = "Daniele" },
+    //    new Impegno(){ Id = 1, Cliente = "Coop", Localita = "Montevarchi", Confermato = false, Quando = new DateTime(2020, 12, 4), Assegnatario = "Marco" },
+    //    new Impegno(){ Id = 2, Cliente = "IBM", Localita = "Roma", Confermato = false, Quando = new DateTime(2020, 12, 22), Assegnatario = "Luca" },
+    //    new Impegno(){ Id = 3, Cliente = "Microsoft", Localita = "Milano", Confermato = true, Quando = new DateTime(2021, 1, 2), Assegnatario = "Francesco" },
+    //};
+    private List<Impegno> tutti = Carica();
 
     public void CambiaConferma(Impegno elemento)
     {
         elemento.Confermato = !elemento.Confermato;
+        string json = JsonConvert.SerializeObject(tutti);
+        File.WriteAllText("archivio.json", json);
     }
 
-    // private Impegno nuovo = new Impegno();
-    // private Dictionary<string, string> ricette = new Dictionary<string, string>(); // "nome ricetta", "istruzioni"
-    // private Dictionary<string, List<Impegno>> bancaDati; // "nome tabella", ["", "", ""]
+    public static List<Impegno> Carica()
+    {
+        List<Impegno> buffer;
+
+        if (File.Exists("archivio.json"))
+        {
+            string json = File.ReadAllText("archivio.json");
+            buffer = JsonConvert.DeserializeObject<List<Impegno>>(json);
+        }
+        else
+        {
+            buffer = new List<Impegno>
+            {
+                new Impegno(){ Id = 0, Cliente = "Divani e Divani", Localita = "Firenze", Confermato = true, Quando = new DateTime(2020, 12, 2), Assegnatario = "Daniele" },
+                new Impegno(){ Id = 1, Cliente = "Coop", Localita = "Montevarchi", Confermato = false, Quando = new DateTime(2020, 12, 4), Assegnatario = "Marco" },
+                new Impegno(){ Id = 2, Cliente = "IBM", Localita = "Roma", Confermato = false, Quando = new DateTime(2020, 12, 22), Assegnatario = "Luca" },
+                new Impegno(){ Id = 3, Cliente = "Microsoft", Localita = "Milano", Confermato = true, Quando = new DateTime(2021, 1, 2), Assegnatario = "Francesco" },
+            };
+        }
+
+        return buffer;
+    }
+
+    private Impegno nuovo = new Impegno();
+    private Dictionary<string, string> ricette = new Dictionary<string, string>(); // "nome ricetta", "istruzioni"
+    private Dictionary<string, List<Impegno>> bancaDati; // "nome tabella", ["", "", ""]
 }

@@ -1,0 +1,79 @@
+﻿@using Newtonsoft.Json;
+@using System.IO;
+
+@page "/impegni_da_confermare"
+
+<h1>Impegni da confermare</h1>
+<p>In questa pagina puoi vedere la lista degli impegni che non sono stati ancora confermati.</p>
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Cliente</th>
+            <th>Località</th>
+            <th>Quando</th>
+            <th>Confermato</th>
+            <th>Assegnatario</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (Impegno singolo in tutti)
+        {
+            if (!singolo.Confermato)
+            {
+                <tr>
+                    <td>@singolo.Id</td>
+                    <td>@singolo.Cliente</td>
+                    <td>@singolo.Localita</td>
+                    <td>@singolo.Quando</td>
+                    <td @onclick="e => CambiaConferma(singolo)">
+                        @if (singolo.Confermato)
+                        {
+                            <span class="oi oi-check" aria-hidden="true" title="Sì" style="color: green"></span>
+                        }
+                        else
+                        {
+                            <span class="oi oi-circle-x" aria-hidden="true" title="No" style="color: indianred"></span>
+                        }
+                    </td>
+                    <td>@singolo.Assegnatario</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@code {
+    private List<Impegno> tutti = Carica();
+
+    public void CambiaConferma(Impegno elemento)
+    {
+        elemento.Confermato = !elemento.Confermato;
+        string json = JsonConvert.SerializeObject(tutti);
+        File.WriteAllText("archivio.json", json);
+    }
+
+    public static List<Impegno> Carica()
+    {
+        List<Impegno> buffer;
+
+        if (File.Exists("archivio.json"))
+        {
+            string json = File.ReadAllText("archivio.json");
+            buffer = JsonConvert.DeserializeObject<List<Impegno>>(json);
+        }
+        else
+        {
+            buffer = new List<Impegno>
+        {
+                new Impegno(){ Id = 0, Cliente = "Divani e Divani", Localita = "Firenze", Confermato = true, Quando = new DateTime(2020, 12, 2), Assegnatario = "Daniele" },
+                new Impegno(){ Id = 1, Cliente = "Coop", Localita = "Montevarchi", Confermato = false, Quando = new DateTime(2020, 12, 4), Assegnatario = "Marco" },
+                new Impegno(){ Id = 2, Cliente = "IBM", Localita = "Roma", Confermato = false, Quando = new DateTime(2020, 12, 22), Assegnatario = "Luca" },
+                new Impegno(){ Id = 3, Cliente = "Microsoft", Localita = "Milano", Confermato = true, Quando = new DateTime(2021, 1, 2), Assegnatario = "Francesco" },
+            };
+        }
+
+        return buffer;
+    }
+}

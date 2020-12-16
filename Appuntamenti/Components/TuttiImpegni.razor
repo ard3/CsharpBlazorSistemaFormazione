@@ -1,0 +1,50 @@
+﻿<h2>Agenda impegni</h2>
+
+<button class="btn btn-primary" @onclick="OnNuovo">Nuovo impegno</button>
+<p>Qui sotto tutti gli impegni inseriti fino ad ora in agenda!</p>
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>Cliente</th>
+            <th>Quando</th>
+            <th>Località</th>
+            <th>Confermato</th>
+            <th>Assegnatario</th>
+            <th>Modifica</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (Impegno singolo in elementi)
+        {
+            <tr>
+                <td>@singolo.Cliente</td>
+                <td>@singolo.Quando</td>
+                <td>@singolo.Localita</td>
+                <td>@singolo.Confermato</td>
+                <td>@singolo.Assegnatario</td>
+                <td>
+                    <span class="oi oi-pencil" @onclick="e => OnModifica.InvokeAsync(singolo)"></span>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+
+    // <TuttiImpegni elementi="" OnNuovo"callable" OnModifica="callable" />
+    @*
+        function modificato(Impegno attuale) 
+        {
+            ...
+        }
+    *@
+    [Parameter]
+    public List<Impegno> elementi { get; set; }
+
+    [Parameter]
+    public EventCallback OnNuovo { get; set; }
+
+    [Parameter]
+    public EventCallback<Impegno> OnModifica { get; set; }
+}

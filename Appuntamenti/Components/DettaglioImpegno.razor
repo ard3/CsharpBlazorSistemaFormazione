@@ -1,0 +1,53 @@
+﻿<h2>Impegno @attuale.Cliente del @attuale.Quando</h2>
+<!-- Impegno COOP del 15/12/2020 -->
+
+<EditForm Model="@attuale" OnValidSubmit="@(e => OnSalva.InvokeAsync(attuale))">
+
+    <div class="form-group">
+        <label for="cliente">Cliente</label>
+        <InputText id="cliente" class="form-control" @bind-Value="attuale.Cliente" />
+    </div>
+
+    <div class="form-group">
+        <label for="quando">Quando</label>
+        <InputDate id="quando" class="form-control" @bind-Value="attuale.Quando" />
+    </div>
+
+    <div class="form-group">
+        <label for="localita">Località</label>
+        <InputText id="localita" class="form-control" @bind-Value="attuale.Localita" />
+    </div>
+
+    <div class="form-group">
+        <label for="confermato">Confermato</label>
+        <InputCheckbox id="confermato" class="form-control" @bind-Value="attuale.Confermato" />
+    </div>
+
+    <div class="form-group">
+        <label for="assegnatario">Assegnatario</label>
+        <InputText id="assegnatario" class="form-control" @bind-Value="attuale.Assegnatario" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Salva</button>
+    <button class="btn btn-secondary" onclick="OnAnnulla">Annulla</button>
+</EditForm>
+
+@code {
+
+    // <DettaglioImpegno attuale="" OnAnnulla="callable" OnSalva="salvataggio" />
+    @*
+        function salvataggio(Impegno ricevuto) 
+        {
+            ...
+        }
+    *@
+
+    [Parameter]
+    public Impegno attuale { get; set; }
+
+    [Parameter]
+    public EventCallback OnAnnulla { get; set; }
+    
+    [Parameter]
+    public EventCallback<Impegno> OnSalva { get; set; }
+}

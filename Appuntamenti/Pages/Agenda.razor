@@ -1,0 +1,64 @@
+﻿@using System.IO;
+@using Newtonsoft.Json;
+@using Appuntamenti.Components;
+@page "/agenda"
+
+@if (attuale == null)
+{
+    <TuttiImpegni elementi="tutti" OnNuovo="nuovo" OnModifica="modifica" />
+}
+else
+{
+    <DettaglioImpegno attuale="attuale" OnAnnulla="annulla" OnSalva="salva" />
+}
+
+@code {
+    // Mi mantengo in ram l'attuale elemento
+    public Impegno attuale { get; set; }
+
+    // ed anche la lista di tutti gli elementi
+    public List<Impegno> tutti = Carica();
+
+    public void nuovo()
+    {
+
+    }
+
+    public void modifica(Impegno selezionato)
+    {
+
+    }
+
+    public void annulla()
+    {
+
+    }
+
+    public void salva(Impegno nuovo)
+    {
+
+    }
+
+    public static List<Impegno> Carica()
+    {
+        List<Impegno> buffer;
+
+        if (File.Exists("archivio.json"))
+        {
+            string json = File.ReadAllText("archivio.json");
+            buffer = JsonConvert.DeserializeObject<List<Impegno>>(json);
+        }
+        else
+        {
+            buffer = new List<Impegno>
+        {
+                new Impegno(){ Id = 0, Cliente = "Divani e Divani", Localita = "Firenze", Confermato = true, Quando = new DateTime(2020, 12, 2), Assegnatario = "Daniele" },
+                new Impegno(){ Id = 1, Cliente = "Coop", Localita = "Montevarchi", Confermato = false, Quando = new DateTime(2020, 12, 4), Assegnatario = "Marco" },
+                new Impegno(){ Id = 2, Cliente = "IBM", Localita = "Roma", Confermato = false, Quando = new DateTime(2020, 12, 22), Assegnatario = "Luca" },
+                new Impegno(){ Id = 3, Cliente = "Microsoft", Localita = "Milano", Confermato = true, Quando = new DateTime(2021, 1, 2), Assegnatario = "Francesco" },
+            };
+        }
+
+        return buffer;
+    }
+}

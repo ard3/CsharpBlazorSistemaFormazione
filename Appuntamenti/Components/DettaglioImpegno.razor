@@ -2,6 +2,8 @@
 <!-- Impegno COOP del 15/12/2020 -->
 
 <EditForm Model="@attuale" OnValidSubmit="@(e => OnSalva.InvokeAsync(attuale))">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
 
     <div class="form-group">
         <label for="cliente">Cliente</label>
@@ -29,7 +31,7 @@
     </div>
 
     <button type="submit" class="btn btn-primary">Salva</button>
-    <button class="btn btn-secondary" onclick="OnAnnulla">Annulla</button>
+    <button type="reset" class="btn btn-secondary" @onclick="OnAnnulla">Annulla</button>
 </EditForm>
 
 @code {

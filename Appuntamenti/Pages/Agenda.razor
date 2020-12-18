@@ -5,7 +5,7 @@
 
 @if (attuale == null)
 {
-    <TuttiImpegni elementi="tutti" OnNuovo="nuovo" OnModifica="modifica" />
+    <TuttiImpegni elementi="tutti" OnNuovo="nuovo" OnModifica="modifica" OnCancella="cancellazione" />
 }
 else
 {
@@ -21,22 +21,76 @@ else
 
     public void nuovo()
     {
-
+        this.attuale = new Impegno();
     }
 
     public void modifica(Impegno selezionato)
     {
-
+        this.attuale = new Impegno()
+        {
+            Id = selezionato.Id,
+            Cliente = selezionato.Cliente,
+            Localita = selezionato.Localita,
+            Quando = selezionato.Quando,
+            Confermato = selezionato.Confermato,
+            Assegnatario = selezionato.Assegnatario,
+        };
     }
 
     public void annulla()
     {
-
+        this.attuale = null;
     }
 
     public void salva(Impegno nuovo)
     {
+        if (nuovo.Id == 0)
+        {
+            // Salva nuovo elemento
+            int nuovoId;
 
+            if (this.tutti.Count > 0)
+            {
+                nuovoId = this.tutti.Max(impegno => impegno.Id) + 1;
+            }
+            else
+            {
+                nuovoId = 1;
+            }
+
+            this.tutti.Add(new Impegno()
+            {
+                Id = nuovoId,
+                Cliente = nuovo.Cliente,
+                Localita = nuovo.Localita,
+                Quando = nuovo.Quando,
+                Confermato = nuovo.Confermato,
+                Assegnatario = nuovo.Assegnatario,
+            });
+        }
+        else
+        {
+            // Modifica elemento esistente
+            Impegno daModificare = this.tutti.Single(impegno => impegno.Id == nuovo.Id);
+            daModificare.Cliente = nuovo.Cliente;
+            daModificare.Localita = nuovo.Localita;
+            daModificare.Quando = nuovo.Quando;
+            daModificare.Confermato = nuovo.Confermato;
+            daModificare.Assegnatario = nuovo.Assegnatario;
+        }
+
+        this.attuale = null;
+        // Salvataggio su file
+        string buffer = JsonConvert.SerializeObject(this.tutti);
+        File.WriteAllText("archivio.json", buffer);
+    }
+
+    public void cancellazione(Impegno daCancellare)
+    {
+        this.tutti.Remove(daCancellare);
+        // Salvataggio su file
+        string buffer = JsonConvert.SerializeObject(this.tutti);
+        File.WriteAllText("archivio.json", buffer);
     }
 
     public static List<Impegno> Carica()
@@ -51,11 +105,11 @@ else
         else
         {
             buffer = new List<Impegno>
-        {
-                new Impegno(){ Id = 0, Cliente = "Divani e Divani", Localita = "Firenze", Confermato = true, Quando = new DateTime(2020, 12, 2), Assegnatario = "Daniele" },
+            {
                 new Impegno(){ Id = 1, Cliente = "Coop", Localita = "Montevarchi", Confermato = false, Quando = new DateTime(2020, 12, 4), Assegnatario = "Marco" },
                 new Impegno(){ Id = 2, Cliente = "IBM", Localita = "Roma", Confermato = false, Quando = new DateTime(2020, 12, 22), Assegnatario = "Luca" },
                 new Impegno(){ Id = 3, Cliente = "Microsoft", Localita = "Milano", Confermato = true, Quando = new DateTime(2021, 1, 2), Assegnatario = "Francesco" },
+                new Impegno(){ Id = 4, Cliente = "Divani e Divani", Localita = "Firenze", Confermato = true, Quando = new DateTime(2020, 12, 2), Assegnatario = "Daniele" },
             };
         }
 

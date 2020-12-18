@@ -2,6 +2,7 @@
 
 <button class="btn btn-primary" @onclick="OnNuovo">Nuovo impegno</button>
 <p>Qui sotto tutti gli impegni inseriti fino ad ora in agenda!</p>
+
 <table class="table table-hover">
     <thead>
         <tr>
@@ -11,6 +12,7 @@
             <th>Confermato</th>
             <th>Assegnatario</th>
             <th>Modifica</th>
+            <th>Cancella</th>
         </tr>
     </thead>
     <tbody>
@@ -20,10 +22,22 @@
                 <td>@singolo.Cliente</td>
                 <td>@singolo.Quando</td>
                 <td>@singolo.Localita</td>
-                <td>@singolo.Confermato</td>
+                <td>
+                    @if (singolo.Confermato)
+                    {
+                        <span class="oi oi-check" aria-hidden="true" title="Sì" style="color: green"></span>
+                    }
+                    else
+                    {
+                        <span class="oi oi-circle-x" aria-hidden="true" title="No" style="color: indianred"></span>
+                    }
+                </td>
                 <td>@singolo.Assegnatario</td>
                 <td>
                     <span class="oi oi-pencil" @onclick="e => OnModifica.InvokeAsync(singolo)"></span>
+                </td>
+                <td>
+                    <span class="oi oi-trash" @onclick="e => OnCancella.InvokeAsync(singolo)"></span>
                 </td>
             </tr>
         }
@@ -39,12 +53,15 @@
             ...
         }
     *@
-    [Parameter]
-    public List<Impegno> elementi { get; set; }
+[Parameter]
+public List<Impegno> elementi { get; set; }
 
-    [Parameter]
-    public EventCallback OnNuovo { get; set; }
+[Parameter]
+public EventCallback OnNuovo { get; set; }
 
-    [Parameter]
-    public EventCallback<Impegno> OnModifica { get; set; }
+[Parameter]
+public EventCallback<Impegno> OnModifica { get; set; }
+
+[Parameter]
+public EventCallback<Impegno> OnCancella { get; set; }
 }

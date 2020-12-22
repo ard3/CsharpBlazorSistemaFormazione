@@ -1,0 +1,127 @@
+﻿@using Newtonsoft.Json;
+@using System.IO;
+@using Appuntamenti.Components;
+@page "/categorie_sp" 
+
+<h2>Gestione categorie</h2>
+@if (attuale == null)
+{
+    <p>Usa la lista qui per modificare, aggiungere ed eliminare le categorie.</p>
+    <p> O <button class="btn btn-primary" @onclick="OnNuovo">clicca qui</button> per aggiungerne una nuova.</p>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Categoria</th>
+                <th>Modifica</th>
+                <th>Elimina</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (Categoria singola in tutte)
+            {
+                <tr>
+                    <td>@singola.Id</td>
+                    <td>@singola.Nome</td>
+                    <td><span class="oi oi-pencil" @onclick="(e => OnModifica(singola))" /></td>
+                    <td><span class="oi oi-circle-x" @onclick="(e => OnElimina(singola))" /></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{ 
+    <EditForm Model="@attuale" OnValidSubmit="@(e => OnSalva(attuale))">
+        <div class="form-group">
+            <label for="categoria">Descrizione della categoria</label>
+            <InputText id="categoria" class="form-control" @bind-Value="attuale.Nome" />
+        </div>
+        <button class="btn btn-primary">Salva</button>
+        <button type="reset" class="btn btn-secondary" @onclick="OnAnnulla">Annulla</button>
+    </EditForm>
+}
+
+
+
+@code {
+    public Categoria attuale;
+    public List<Categoria> tutte = Caricamento();
+
+    public void OnNuovo()
+    {
+        attuale = new Categoria();
+    }
+
+    public void OnAnnulla()
+    {
+        attuale = null;
+    }
+
+    public void OnSalva(Categoria editato)
+    {
+        if (editato.Id == 0)
+        {
+            // Deve essere inserita una nuova categoria
+            int nuovoId;
+
+            if (tutte.Count > 0)
+            {
+                nuovoId = tutte.Max(categoria => categoria.Id) + 1;
+            }
+            else
+            {
+                nuovoId = 1;
+            }
+
+            tutte.Add(new Categoria()
+            {
+                Id = nuovoId,
+                Nome = editato.Nome,
+            });
+        }
+        else
+        {
+            // Deve essere modificata una categoria
+            Categoria casella = tutte.Single(singolo => singolo.Id == editato.Id);
+            casella.Nome = editato.Nome;
+        }
+
+        attuale = null;
+        Salvataggio();
+    }
+
+    public void OnModifica(Categoria inEsame)
+    {
+        attuale = new Categoria()
+        {
+            Id = inEsame.Id,
+            Nome = inEsame.Nome,
+        };
+    }
+
+    public void OnElimina(Categoria inEsame)
+    {
+        tutte.Remove(inEsame);
+        Salvataggio();
+    }
+
+    public void Salvataggio()
+    {
+        string buffer = JsonConvert.SerializeObject(tutte);
+        File.WriteAllText("categorie.json", buffer);
+    }
+
+    public static List<Categoria> Caricamento()
+    {
+        if (File.Exists("categorie.json"))
+        {
+            string buffer = File.ReadAllText("categorie.json");
+            return JsonConvert.DeserializeObject<List<Categoria>>(buffer);
+        }
+        else
+        {
+            return new List<Categoria>();
+        }
+    }
+}

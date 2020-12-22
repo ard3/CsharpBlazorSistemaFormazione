@@ -1,0 +1,101 @@
+﻿@using System.IO;
+@using Newtonsoft.Json;
+@using Appuntamenti.Components;
+@page "/categorie"
+
+@if (attuale == null)
+{
+    <TutteCategorie elementi="tutti" OnNuovo="nuovo" OnModifica="modifica" OnCancella="cancellazione" />
+}
+else
+{
+    <DettaglioCategoria attuale="attuale" OnAnnulla="annulla" OnSalva="salva" />
+}
+
+@code {
+    public Categoria attuale { get; set; }
+
+    public List<Categoria> tutti = Carica();
+
+    public void nuovo()
+    {
+        this.attuale = new Categoria();
+    }
+
+    public void modifica(Categoria selezionata)
+    {
+        this.attuale = new Categoria()
+        {
+            Id = selezionata.Id,
+            Nome = selezionata.Nome,
+        };
+    }
+
+    public void annulla()
+    {
+        this.attuale = null;
+    }
+
+    public void salva(Categoria nuova)
+    {
+        if (nuova.Id == 0)
+        {
+            int nuovoId;
+
+            if (this.tutti.Count > 0)
+            {
+                nuovoId = this.tutti.Max(categoria => categoria.Id) + 1;
+            }
+            else
+            {
+                nuovoId = 1;
+            }
+
+            this.tutti.Add(new Categoria()
+            {
+                Id = nuovoId,
+                Nome = nuova.Nome,
+            });
+        }
+        else
+        {
+            Categoria daModificare = this.tutti.Single(categoria => categoria.Id == nuova.Id);
+            daModificare.Nome = nuova.Nome;
+        }
+
+        this.attuale = null;
+        string buffer = JsonConvert.SerializeObject(this.tutti);
+        File.WriteAllText("categorie.json", buffer);
+    }
+
+    public void cancellazione(Categoria daCancellare)
+    {
+        this.tutti.Remove(daCancellare);
+        string buffer = JsonConvert.SerializeObject(this.tutti);
+        File.WriteAllText("categorie.json", buffer);
+    }
+
+
+    public static List<Categoria> Carica()
+    {
+        List<Categoria> buffer;
+
+        if (File.Exists("categorie.json"))
+        {
+            string json = File.ReadAllText("categorie.json");
+            buffer = JsonConvert.DeserializeObject<List<Categoria>>(json);
+        }
+        else
+        {
+            buffer = new List<Categoria>
+            {
+                new Categoria() { Id = 1, Nome = "Completati"},
+                new Categoria() { Id = 2, Nome = "Da portare a termine"},
+                new Categoria() { Id = 3, Nome = "Rimandati"},
+                new Categoria() { Id = 4, Nome = "Saltati"},
+            };
+        }
+
+        return buffer;
+    }
+}

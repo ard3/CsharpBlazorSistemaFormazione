@@ -1,0 +1,44 @@
+﻿<h2>Elenco categorie</h2>
+
+<button class="btn btn-primary" @onclick="OnNuovo">Nuova categoria</button>
+<p>Qui sotto sono indicate tutte le categorie inserite fino ad ora.</p>
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Nome</th>
+            <th>Modifica</th>
+            <th>Cancella</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (Categoria singola in elementi)
+        {
+        <tr>
+            <td>@singola.Id</td>
+            <td>@singola.Nome</td>
+            <td>
+                <span class="oi oi-pencil" @onclick="e => OnModifica.InvokeAsync(singola)"></span>
+            </td>
+            <td>
+                <span class="oi oi-trash" @onclick="e => OnCancella.InvokeAsync(singola)"></span>
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    [Parameter]
+    public List<Categoria> elementi { get; set; }
+    
+    [Parameter]
+    public EventCallback OnNuovo { get; set; }
+    
+    [Parameter]
+    public EventCallback<Categoria> OnModifica { get; set; }
+    
+    [Parameter]
+    public EventCallback<Categoria> OnCancella { get; set; }
+}

@@ -1,0 +1,46 @@
+﻿<h2>Lista prodotti</h2>
+
+<button class="btn btn-primary" @onclick="OnNuovo">Nuovo prodotto</button>
+<p>Qui sono indicati tutti i prodotti presenti nel database</p>
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Prodotto</th>
+            <th>Modifica</th>
+            <th>Cancella</th>
+        </tr>
+    </thead>
+        @foreach (Prodotto singolo in elementi)
+        {
+            <tr>
+                <td>@singolo.Id</td>
+                <td>@singolo.Nome</td>
+                <td>
+                    <span class="oi oi-pencil" @onclick="e => OnModifica.InvokeAsync(singolo)"></span>
+                </td>
+                <td>
+                    <span class="oi oi-trash" @onclick="e => OnCancella.InvokeAsync(singolo)"></span>
+                </td>
+            </tr>
+        }
+    <tbody>
+
+    </tbody>
+</table>
+
+@code {
+    [Parameter]
+    public List<Prodotto> elementi { get; set; }
+
+    [Parameter]
+    public EventCallback OnNuovo { get; set; }
+    
+    [Parameter]
+    public EventCallback<Prodotto> OnModifica { get; set; }
+    
+    [Parameter]
+    public EventCallback<Prodotto> OnCancella { get; set; }
+
+}

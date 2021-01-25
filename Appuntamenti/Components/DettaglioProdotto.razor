@@ -1,0 +1,25 @@
+﻿<h2>Dettaglio prodotto per @attuale.Nome</h2>
+
+<EditForm Model="@attuale" OnValidSubmit="@(e => OnSalva.InvokeAsync(attuale))">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="nome">Nome prodotto</label>
+        <InputText id="nome" class="form-control" @bind-Value="attuale.Nome" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Salva</button>
+    <button type="reset" class="btn btn-secondary" @onclick="OnAnnulla">Annulla</button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public Prodotto attuale { get; set; }
+
+    [Parameter]
+    public EventCallback OnAnnulla { get; set; }
+
+    [Parameter]
+    public EventCallback<Prodotto> OnSalva { get; set; }
+}

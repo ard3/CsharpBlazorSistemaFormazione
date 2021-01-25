@@ -1,0 +1,52 @@
+﻿@using System.IO;
+@using Newtonsoft.Json;
+
+<select id="@id" class="@classe">
+    @foreach (Categoria singola in tutte)
+    {
+        @if (singola.Id == selezionato)
+        {
+            <option value="@singola.Id" selected>@singola.Nome</option>
+        }
+        else
+        {
+            <option value="@singola.Id">@singola.Nome</option>
+        }
+    }
+</select>
+@code {
+
+    //<ListaCategorie id="Id" selezionato=3/>
+
+
+    public List<Categoria> tutte = Carica();
+
+    [Parameter]
+    public string id { get; set; }
+
+    [Parameter]
+    public string classe { get; set; }
+
+    [Parameter]
+    public int selezionato { get; set; }
+
+    static public List<Categoria> Carica()
+    {
+        if (File.Exists("categorie.json"))
+        {
+            // leggere il file
+            string contenuto = File.ReadAllText("categorie.json");
+
+            // decodificarlo da json
+            List<Categoria> buffer = JsonConvert.DeserializeObject<List<Categoria>>(contenuto);
+
+            // restituire la nuova struttura
+            return buffer;
+        }
+        else
+        {
+            return new List<Categoria>();
+        }
+    }
+
+}

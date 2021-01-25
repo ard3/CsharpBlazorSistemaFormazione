@@ -3,6 +3,12 @@
 @using Appuntamenti.Components;
 @page "/categorie"
 
+<button class="btn btn-light m-1">
+    <NavLink class="nav-link" href="categorie_sp">
+        <span class="oi oi-clipboard" aria-hidden="true"></span> CategorieSP
+    </NavLink>
+</button>
+
 @if (attuale == null)
 {
     <TutteCategorie elementi="tutti" OnNuovo="nuovo" OnModifica="modifica" OnCancella="cancellazione" />

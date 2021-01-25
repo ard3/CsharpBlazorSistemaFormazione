@@ -1,0 +1,103 @@
+﻿@using System.IO;
+@using Newtonsoft.Json;
+@using Appuntamenti.Components;
+@page "/prodotti"
+
+
+@if (attuale == null)
+{
+    <TuttiProdotti elementi="tutti" OnNuovo="nuovo" OnModifica="modifica" OnCancella="cancella" />
+}
+else
+{
+    <DettaglioProdotto attuale="attuale" OnAnnulla="annulla" OnSalva="salva" />
+}
+
+
+@code {
+    public Prodotto attuale { get; set; }
+
+    public List<Prodotto> tutti = Carica();
+
+
+    public void nuovo()
+    {
+        this.attuale = new Prodotto();
+    }
+
+    public void modifica(Prodotto selezionato)
+    {
+        this.attuale = new Prodotto()
+        {
+            Id = selezionato.Id,
+            Nome = selezionato.Nome,
+        };
+    }
+
+    public void annulla()
+    {
+        this.attuale = null;
+    }
+
+    public void salva(Prodotto nuovo)
+    {
+        if (nuovo.Id == 0)
+        {
+            int nuovoId;
+
+            if (tutti.Count == 0)
+            {
+                nuovoId = 1;
+            }
+            else
+            {
+                nuovoId = this.tutti.Max(Prodotto => Prodotto.Id) + 1;
+            }
+
+            this.tutti.Add(new Prodotto()
+            {
+                Id = nuovoId,
+                Nome = nuovo.Nome,
+            });
+        }
+        else
+        {
+            Prodotto daModificare = this.tutti.Single(prodotto => prodotto.Id == nuovo.Id);
+            daModificare.Nome = nuovo.Nome;
+        }
+
+        this.attuale = null;
+        string buffer = JsonConvert.SerializeObject(tutti);
+        File.WriteAllText("prodotti.json", buffer);
+    }
+
+    public void cancella(Prodotto daCancellare)
+    {
+        this.tutti.Remove(daCancellare);
+        string buffer = JsonConvert.SerializeObject(tutti);
+        File.WriteAllText("prodotti.json", buffer);
+    }
+
+
+    public static List<Prodotto> Carica()
+    {
+        List<Prodotto> buffer;
+
+        if (File.Exists("prodotti.json"))
+        {
+            string json = File.ReadAllText("prodotti.json");
+            buffer = JsonConvert.DeserializeObject<List<Prodotto>>(json);
+        }
+        else
+        {
+            buffer = new List<Prodotto>()
+            {
+                new Prodotto() {Id = 1, Nome = "Monitor"},
+                new Prodotto() {Id = 2, Nome = "Tastiera"},
+                new Prodotto() {Id = 3, Nome = "Mouse"}
+            };
+        }
+
+        return buffer;
+    }
+}

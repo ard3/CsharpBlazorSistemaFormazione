@@ -1,0 +1,89 @@
+﻿@using System.IO;
+@using Newtonsoft.Json;
+
+
+@*<select>
+        <option value="0">seleziona...</option>
+        <option value="1">categoria1</option>
+        <option value="2">categoria2</option>
+        <option value="3">categoria3</option>
+    </select>*@
+
+
+<select id="@id" class="form-control" @onchange="Aggiornamento">
+
+    <option value="0">@descrizione</option>
+
+    @foreach (Categoria singola in tutte)
+    {
+        @if (singola.Id == selezionato)
+        {
+            <option value="@singola.Id" selected>@singola.Nome</option>
+        }
+        else
+        {
+            <option value="@singola.Id">@singola.Nome</option>
+        }
+    }
+</select>
+@code { //<SelectCategoria id="Id" descrizione="Filtra su..." @bind-selezionato="1"/>
+
+    public List<Categoria> tutte = Inizializza();
+
+    [Parameter]
+    public string id { get; set; }
+
+    //[Parameter]
+    //public string classe { get; set; }
+
+    [Parameter]
+    public int selezionato { get; set; }
+
+    [Parameter]
+    public string descrizione { get; set; }
+
+
+    // Gestione bind di valore
+    // Creiamo un parametro collegabile
+    [Parameter]
+    public int idCategoria { get; set; }
+
+    // Creiamo un EventCallback che il sistema collegherà al bind-Value
+    [Parameter]
+    public EventCallback<int> idCategoriaChanged { get; set; }
+
+    // Che verrà lanciata dall'esecuzione di una nostra funzione server
+    //private async Task AggiornaIdCategoria(ChangeEventArgs e)
+    //{
+    //    await IdCategoriaChanged
+    //}
+
+
+    [Parameter]
+    public static string lut { get; set; } = "categorie";
+
+    static public List<Categoria> Inizializza()
+    {
+        if (File.Exists(lut + ".json"))
+        {
+            // leggere il file
+            string contenuto = File.ReadAllText(lut + ".json");
+
+            // decodificarlo da json
+            List<Categoria> buffer = JsonConvert.DeserializeObject<List<Categoria>>(contenuto);
+
+            // restituire la nuova struttura
+            return buffer;
+        }
+
+        return new List<Categoria>();
+
+    }
+
+    public async Task Aggiornamento(ChangeEventArgs evento)
+    {
+        int nuovoValore = int.Parse(evento.Value.ToString());
+        await idCategoriaChanged.InvokeAsync(nuovoValore);
+    }
+
+}

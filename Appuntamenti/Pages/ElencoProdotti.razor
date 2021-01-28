@@ -6,6 +6,12 @@
 
 @if (attuale == null)
 {
+    <button class="btn btn-light m-1">
+        <NavLink class="nav-link" href="prodotti_sp">
+            <span class="oi oi-clipboard" aria-hidden="true"></span> ProdottiSP
+        </NavLink>
+    </button>
+
     <TuttiProdotti elementi="tutti" OnNuovo="nuovo" OnModifica="modifica" OnCancella="cancella" />
 }
 else
@@ -91,7 +97,7 @@ else
         else
         {
             buffer = new List<Prodotto>()
-            {
+        {
                 new Prodotto() {Id = 1, Nome = "Monitor"},
                 new Prodotto() {Id = 2, Nome = "Tastiera"},
                 new Prodotto() {Id = 3, Nome = "Mouse"}

@@ -1,1 +1,1 @@
-[{"Id":1,"Nome":"Monitor"},{"Id":2,"Nome":"Tastiera"},{"Id":3,"Nome":"Mouse"}]
+[{"Id":3,"Nome":"Mouse","Prezzo":0.0,"IdCategoria":0},{"Id":4,"Nome":"Monitor","Prezzo":0.0,"IdCategoria":0},{"Id":5,"Nome":"Tastiera","Prezzo":0.0,"IdCategoria":0},{"Id":6,"Nome":"Cavo hdmi","Prezzo":0.0,"IdCategoria":0}]

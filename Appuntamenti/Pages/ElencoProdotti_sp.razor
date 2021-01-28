@@ -1,0 +1,112 @@
+﻿@using System.IO;
+@using Newtonsoft.Json;
+@page "/prodotti_sp"
+
+
+@if (attuale == null)
+{
+    titolo = "Catalogo";
+}
+else
+{
+    if (attuale.Id == 0)
+    {
+        titolo = "Nuovo prodotto";
+    }
+    else
+    {
+        titolo = "Modifica prodotto";
+    }
+}
+
+<h1>@titolo</h1>
+<p>Usa questa pagina per gestire il tuo catalogo prodotti!</p>
+@*@if (daModificare == null) { <p>Test</p> }*@
+
+@if (attuale == null)
+{ // Lista di tutti i prodotti
+    <p><b>@tutti.Count</b> prodotti in catalogo</p>
+    <SelectCategoria @bind-idCategoria="categoriaSelezionata" descrizione="Filtra per categoria" />
+    <p>Hai selezionato la categoria numero @categoriaSelezionata</p>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Prodotto</th>
+                <th width="1%">Prezzo</th>
+                <th width="1%">Categoria</th>
+                <th width="1%">Modifica</th>
+                <th width="1%">Cancella</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (Prodotto singolo in tutti)
+            {
+                if (categoriaSelezionata == 0 || singolo.IdCategoria == categoriaSelezionata)
+                { 
+                    <tr>
+                        <td>@singolo.Nome</td>
+                        <td>&euro;@singolo.Prezzo</td>
+                        <td>@singolo.IdCategoria</td>
+                        <td><span class="oi oi-pencil" aria-hidden="true" title="Sì" style="color: mediumblue" @onclick="e => OnModifica(singolo)" /></td>
+                        <td><span class="oi oi-trash" aria-hidden="true" title="No" style="color: indianred" @onclick="e => OnCancella(singolo)" /></td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    @*<EditForm Model="daModificare" OnValidSubmit="">
+        <InputText Value="@daModificare.Nome" />
+    </EditForm>*@
+    <p>Test</p>
+
+}
+
+
+@code {
+
+    public List<Prodotto> tutti = Inizializza();
+
+    public Prodotto attuale;
+
+    public string titolo;
+
+    public int categoriaSelezionata;
+
+    public Prodotto daModificare;
+
+    // TODO
+    public void OnModifica(Prodotto selezionato)
+    {
+        //tutti.Single(singolo => singolo.Id == selezionato.Id);
+        daModificare = new Prodotto();
+        
+        daModificare.Id = selezionato.Id;
+        daModificare.Nome = selezionato.Nome;
+        daModificare.Prezzo = selezionato.Prezzo;
+        daModificare.IdCategoria = selezionato.IdCategoria;
+
+
+    }
+
+    public void OnCancella(Prodotto selezionato)
+    {
+        Prodotto daCancellare = tutti.Single(singolo => singolo.Id == selezionato.Id);
+        tutti.Remove(daCancellare);
+        File.WriteAllText("prodotti.json", JsonConvert.SerializeObject(tutti));
+    }
+
+    static public List<Prodotto> Inizializza()
+    {
+        if (File.Exists("prodotti.json"))
+        {
+            string buffer = File.ReadAllText("prodotti.json");
+
+            return JsonConvert.DeserializeObject<List<Prodotto>>(buffer);
+        }
+
+        return new List<Prodotto>();
+    }
+}

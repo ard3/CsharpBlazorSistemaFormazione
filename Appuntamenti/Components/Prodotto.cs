@@ -12,5 +12,10 @@ namespace Appuntamenti.Components
 
         [Required(ErrorMessage = "Inserire nome prodotto")]
         public string Nome { get; set; }
+
+        public double Prezzo { get; set; }
+
+        public int IdCategoria { get; set; }
+
     }
 }

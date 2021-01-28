@@ -8,6 +8,8 @@
         <tr>
             <th>Id</th>
             <th>Prodotto</th>
+            <th>Prezzo</th>
+            <th>Categoria</th>
             <th>Modifica</th>
             <th>Cancella</th>
         </tr>
@@ -17,6 +19,8 @@
             <tr>
                 <td>@singolo.Id</td>
                 <td>@singolo.Nome</td>
+                <td>&euro;@singolo.Prezzo</td>
+                <td>@singolo.IdCategoria</td>
                 <td>
                     <span class="oi oi-pencil" @onclick="e => OnModifica.InvokeAsync(singolo)"></span>
                 </td>

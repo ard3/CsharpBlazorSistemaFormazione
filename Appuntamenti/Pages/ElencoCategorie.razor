@@ -3,14 +3,14 @@
 @using Appuntamenti.Components;
 @page "/categorie"
 
-<button class="btn btn-light m-1">
-    <NavLink class="nav-link" href="categorie_sp">
-        <span class="oi oi-clipboard" aria-hidden="true"></span> CategorieSP
-    </NavLink>
-</button>
-
 @if (attuale == null)
 {
+    <button class="btn btn-light m-1">
+        <NavLink class="nav-link" href="categorie_sp">
+            <span class="oi oi-clipboard" aria-hidden="true"></span> CategorieSP
+        </NavLink>
+    </button>
+
     <TutteCategorie elementi="tutti" OnNuovo="nuovo" OnModifica="modifica" OnCancella="cancellazione" />
 }
 else
@@ -94,7 +94,7 @@ else
         else
         {
             buffer = new List<Categoria>
-            {
+        {
                 new Categoria() { Id = 1, Nome = "Completati"},
                 new Categoria() { Id = 2, Nome = "Da portare a termine"},
                 new Categoria() { Id = 3, Nome = "Rimandati"},

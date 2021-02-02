@@ -1,0 +1,187 @@
+﻿@using System.IO;
+@using Newtonsoft.Json;
+@page "/parco_macchine"
+
+@if (attuale == null)
+{
+    titolo = "Calendario prenotazioni";
+}
+else
+{
+    if (attuale.Id == 0)
+    {
+        titolo = "Nuova prenotazione";
+    }
+    else
+    {
+        titolo = "Modifica prenotazione";
+    }
+}
+
+<h1>@titolo</h1>
+<p>Usa questa pagina per gestire le prenotazioni dei mezzi aziendali.</p>
+
+@if (attuale == null)
+{ // Lista di tutte le prenotazioni
+    <p><b>@tutti.Count</b> prenotazioni in catalogo</p>
+    <SelectAutomobile @bind-idAutomobile="autoSelezionata" descrizione="Filtra per automobile" />
+    <p>Hai selezionato l'auto numero @autoSelezionata</p>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th width="1%">ID Auto</th>
+                <th width="1%">Nome</th>
+                <th width="1%">Destinazione</th>
+                <th width="1%">Data inizio</th>
+                <th width="1%">Data fine</th>
+                <th width="1%">Modifica</th>
+                <th width="1%">Cancella</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (Prenotazione singolo in tutti)
+            {
+                if (autoSelezionata == 0 || singolo.IdAuto == autoSelezionata)
+                {
+                    <tr>
+                        <td>@singolo.IdAuto</td>
+                        <td>@singolo.Chi</td>
+                        <td>@singolo.Dove</td>
+                        <td>@singolo.Inizio</td>
+                        <td>@singolo.Fine</td>
+                        <td><span class="oi oi-pencil" style="color: mediumblue" @onclick="(e => OnModifica(singolo))"></span></td>
+                        <td><span class="oi oi-trash" style="color: indianred" @onclick="(e => OnCancella(singolo))"></span></td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+    <span class="oi oi-plus btn btn-primary" @onclick="OnNuovo"></span>
+}
+else
+{
+    <EditForm Model="@attuale" OnValidSubmit="@(e => OnSalva(attuale))">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="form-group">
+            <label for="chi">Nome</label>
+            <InputText id="chi" @bind-Value="attuale.Chi" class="form-control" />
+
+            <label for="destinazione">Destinazione</label>
+            <InputText id="destinazione" @bind-Value="attuale.Dove" class="form-control" />
+
+            <label for="inizio">Data inizio</label>
+            <InputDate id="inizio" @bind-Value="attuale.Inizio" class="form-control" />
+
+            <label for="fine">Data fine</label>
+            <InputDate id="fine" @bind-Value="attuale.Fine" class="form-control" />
+        </div>
+        <div>
+            <label for="IdAutomobile">Automobile</label>
+            <SelectAutomobile @bind-idAutomobile="attuale.IdAuto"></SelectAutomobile>
+        </div>
+        <button class="oi oi-check btn btn-primary"></button>
+        <button type="reset" class="oi oi-x btn btn-secondary" @onclick="OnAnnulla"></button>
+    </EditForm>
+}
+
+
+@code {
+
+    public List<Prenotazione> tutti = Inizializza();
+
+    public Prenotazione attuale;
+
+    public string titolo;
+
+    public int autoSelezionata;
+
+
+
+    // TODO
+    public void OnModifica(Prenotazione selezionato)
+    {
+        // per evitare di sovrascrivere l'elemento prima della conferma
+        // creiamo una nuova prenotazione
+        //tutti.Single(singolo => singolo.Id == selezionato.Id);
+        attuale = new Prenotazione();
+
+        attuale.Id = selezionato.Id;
+        attuale.Chi = selezionato.Chi;
+        attuale.Dove = selezionato.Dove;
+        attuale.IdAuto = selezionato.IdAuto;
+        attuale.Inizio = selezionato.Inizio;
+        attuale.Fine = selezionato.Fine;
+
+    }
+
+
+    public void OnCancella(Prenotazione selezionato)
+    {
+        Prenotazione daCancellare = tutti.Single(singolo => singolo.Id == selezionato.Id);
+        tutti.Remove(daCancellare);
+        Salva();
+    }
+
+
+    public void OnNuovo()
+    {
+        attuale = new Prenotazione();
+        attuale.IdAuto = autoSelezionata;
+    }
+
+
+    public void OnAnnulla()
+    {
+        attuale = null;
+    }
+
+
+    public void OnSalva(Prenotazione editato)
+    {
+        if (editato.Id == 0)
+        {
+            if (tutti.Count > 0)
+            {
+                editato.Id = tutti.Max(singolo => singolo.Id) + 1;
+            }
+            else
+            {
+                editato.Id = 1;
+            }
+            tutti.Add(editato);
+        }
+        else
+        {
+            Prenotazione inlista = tutti.Single(vecchio => vecchio.Id == editato.Id);
+            inlista.Chi = editato.Chi;
+            inlista.Dove = editato.Dove;
+            inlista.Inizio = editato.Inizio;
+            inlista.Fine = editato.Fine;
+            inlista.IdAuto = editato.IdAuto;
+        }
+        Salva();
+    }
+
+
+    static public List<Prenotazione> Inizializza()
+    {
+        if (File.Exists("prenotazioni.json"))
+        {
+            string buffer = File.ReadAllText("prenotazioni.json");
+
+            return JsonConvert.DeserializeObject<List<Prenotazione>>(buffer);
+        }
+
+        return new List<Prenotazione>();
+    }
+
+
+    public void Salva()
+    {
+        string trasformato = JsonConvert.SerializeObject(tutti);
+        File.WriteAllText("prenotazioni.json", trasformato);
+        attuale = null;
+    }
+}
+

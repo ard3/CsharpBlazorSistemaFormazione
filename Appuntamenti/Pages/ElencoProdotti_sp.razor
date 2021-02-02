@@ -33,7 +33,6 @@ else
             <tr>
                 <th>Prodotto</th>
                 <th width="1%">Prezzo</th>
-                <th width="1%">Categoria</th>
                 <th width="1%">Modifica</th>
                 <th width="1%">Cancella</th>
             </tr>
@@ -42,26 +41,35 @@ else
             @foreach (Prodotto singolo in tutti)
             {
                 if (categoriaSelezionata == 0 || singolo.IdCategoria == categoriaSelezionata)
-                { 
+                {
                     <tr>
                         <td>@singolo.Nome</td>
                         <td>&euro;@singolo.Prezzo</td>
-                        <td>@singolo.IdCategoria</td>
-                        <td><span class="oi oi-pencil" aria-hidden="true" title="Sì" style="color: mediumblue" @onclick="e => OnModifica(singolo)" /></td>
-                        <td><span class="oi oi-trash" aria-hidden="true" title="No" style="color: indianred" @onclick="e => OnCancella(singolo)" /></td>
+                        <td><span class="oi oi-pencil" style="color: mediumblue" @onclick="(e => OnModifica(singolo))"></span></td>
+                        <td><span class="oi oi-trash" style="color: indianred" @onclick="(e => OnCancella(singolo))"></span></td>
                     </tr>
                 }
             }
         </tbody>
     </table>
+    <span class="oi oi-plus btn btn-primary" @onclick="OnNuovo"></span>
 }
 else
 {
-    @*<EditForm Model="daModificare" OnValidSubmit="">
-        <InputText Value="@daModificare.Nome" />
-    </EditForm>*@
-    <p>Test</p>
-
+    <EditForm Model="@attuale" OnValidSubmit="@(e => OnSalva(attuale))">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="form-group">
+            <label for="prodotto">Prodotto</label>
+            <InputText id="prodotto" @bind-Value="attuale.Nome" class="form-control" />
+        </div>
+        <div>
+            <label for="IdCategoria">Categoria</label>
+            <SelectCategoria @bind-idCategoria="attuale.IdCategoria"></SelectCategoria>
+        </div>
+        <button class="oi oi-check btn btn-primary"></button>
+        <button type="reset" class="oi oi-x btn btn-secondary" @onclick="OnAnnulla"></button>
+    </EditForm>
 }
 
 
@@ -75,28 +83,68 @@ else
 
     public int categoriaSelezionata;
 
-    public Prodotto daModificare;
+
 
     // TODO
     public void OnModifica(Prodotto selezionato)
     {
+        // per evitare di sovrascrivere l'elemento prima della conferma
+        // creiamo un nuovo prodotto
         //tutti.Single(singolo => singolo.Id == selezionato.Id);
-        daModificare = new Prodotto();
-        
-        daModificare.Id = selezionato.Id;
-        daModificare.Nome = selezionato.Nome;
-        daModificare.Prezzo = selezionato.Prezzo;
-        daModificare.IdCategoria = selezionato.IdCategoria;
+        attuale = new Prodotto();
 
+        attuale.Id = selezionato.Id;
+        attuale.Nome = selezionato.Nome;
+        attuale.Prezzo = selezionato.Prezzo;
+        attuale.IdCategoria = selezionato.IdCategoria;
 
     }
+
 
     public void OnCancella(Prodotto selezionato)
     {
         Prodotto daCancellare = tutti.Single(singolo => singolo.Id == selezionato.Id);
         tutti.Remove(daCancellare);
-        File.WriteAllText("prodotti.json", JsonConvert.SerializeObject(tutti));
+        Salva();
     }
+
+
+    public void OnNuovo()
+    {
+        attuale = new Prodotto();
+        attuale.IdCategoria = categoriaSelezionata;
+    }
+
+
+    public void OnAnnulla()
+    {
+        attuale = null;
+    }
+
+
+    public void OnSalva(Prodotto editato)
+    {
+        if (editato.Id == 0)
+        {
+            if (tutti.Count > 0)
+            {
+                editato.Id = tutti.Max(singolo => singolo.Id) + 1;
+            }
+            else
+            {
+                editato.Id = 1;
+            }
+            tutti.Add(editato);
+        }
+        else
+        {
+            Prodotto inlista = tutti.Single(vecchio => vecchio.Id == editato.Id);
+            inlista.Nome = editato.Nome;
+            inlista.IdCategoria = editato.IdCategoria;
+        }
+        Salva();
+    }
+
 
     static public List<Prodotto> Inizializza()
     {
@@ -108,5 +156,13 @@ else
         }
 
         return new List<Prodotto>();
+    }
+
+
+    public void Salva()
+    {
+        string trasformato = JsonConvert.SerializeObject(tutti);
+        File.WriteAllText("prodotti.json", trasformato);
+        attuale = null;
     }
 }

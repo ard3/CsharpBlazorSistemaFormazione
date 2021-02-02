@@ -1,0 +1,135 @@
+﻿@using Newtonsoft.Json;
+@using System.IO;
+@page "/automobili"
+
+<h2>Gestione automobili</h2>
+
+@if (attuale == null)
+{
+    <p>Usa la lista qui per modificare, aggiungere ed eliminare le automobili.</p>
+    <p> O <button class="btn btn-primary" @onclick="OnNuovo">clicca qui</button> per aggiungerne una nuova.</p>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Targa</th>
+                <th>Modello</th>
+                <th>Modifica</th>
+                <th>Elimina</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (Automobile singola in tutte)
+            {
+                <tr>
+                    <td>@singola.Id</td>
+                    <td>@singola.Targa</td>
+                    <td>@singola.Modello</td>
+                    <td><span class="oi oi-pencil" @onclick="(e => OnModifica(singola))" /></td>
+                    <td><span class="oi oi-circle-x" @onclick="(e => OnElimina(singola))" /></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <EditForm Model="@attuale" OnValidSubmit="@(e => OnSalva(attuale))">
+        <div class="form-group">
+            <label for="targa">Targa automobile</label>
+            <InputText id="targa" class="form-control" @bind-Value="attuale.Targa" />
+            <label for="modello">Modello automobile</label>
+            <InputText id="modello" class="form-control" @bind-Value="attuale.Modello" />
+        </div>
+        <button class="btn btn-primary">Salva</button>
+        <button type="reset" class="btn btn-secondary" @onclick="OnAnnulla">Annulla</button>
+    </EditForm>
+}
+
+
+
+@code {
+    public Automobile attuale;
+    public List<Automobile> tutte = Caricamento();
+
+    public void OnNuovo()
+    {
+        attuale = new Automobile();
+    }
+
+    public void OnAnnulla()
+    {
+        attuale = null;
+    }
+
+    public void OnSalva(Automobile editato)
+    {
+        if (editato.Id == 0)
+        {
+            // Deve essere inserita una nuova automobile
+            int nuovoId;
+
+            if (tutte.Count > 0)
+            {
+                nuovoId = tutte.Max(automobile => automobile.Id) + 1;
+            }
+            else
+            {
+                nuovoId = 1;
+            }
+
+            tutte.Add(new Automobile()
+            {
+                Id = nuovoId,
+                Targa = editato.Targa,
+                Modello = editato.Modello
+            });
+        }
+        else
+        {
+            // Deve essere modificata un'automobile
+            Automobile casella = tutte.Single(singolo => singolo.Id == editato.Id);
+            casella.Targa = editato.Targa;
+            casella.Modello = editato.Modello;
+        }
+
+        attuale = null;
+        Salvataggio();
+    }
+
+    public void OnModifica(Automobile inEsame)
+    {
+        attuale = new Automobile()
+        {
+            Id = inEsame.Id,
+            Targa = inEsame.Targa,
+            Modello = inEsame.Modello
+        };
+    }
+
+    public void OnElimina(Automobile inEsame)
+    {
+        tutte.Remove(inEsame);
+        Salvataggio();
+    }
+
+    public void Salvataggio()
+    {
+        string buffer = JsonConvert.SerializeObject(tutte);
+        File.WriteAllText("automobili.json", buffer);
+    }
+
+    public static List<Automobile> Caricamento()
+    {
+        if (File.Exists("automobili.json"))
+        {
+            string buffer = File.ReadAllText("automobili.json");
+            return JsonConvert.DeserializeObject<List<Automobile>>(buffer);
+        }
+        else
+        {
+            return new List<Automobile>();
+        }
+    }
+}
+

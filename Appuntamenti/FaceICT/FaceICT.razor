@@ -1,0 +1,167 @@
+﻿@using System.IO;
+@using Newtonsoft.Json;
+@using System.Linq;
+@page "/face_ict"
+
+
+<h1>FaceICT</h1>
+
+@if (attuale == null)
+{
+    <p>Benvenuto a FaceICT! Qui potrai visualizzare i post di tutti gli utenti, aggiungerne di nuovi, o perché no, modificarne di vecchi!</p>
+    <p>Sono presenti <b>@tutti.Count</b> posts su FaceICT.</p>
+
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th width="1%">Utente</th>
+                <th width="1%">Data</th>
+                <th>Post</th>
+                <th width="1%"></th>
+                <th width="1%"></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td></td>
+                <td></td>
+                <td>
+                    <button type="button" class="btn btn-primary" @onclick="OnNuovo"><span class="oi oi-plus" style="color: white; margin-right: 10px"></span><span style="font-size: large">A cosa stai pensando?</span></button>
+                </td>
+                <td></td>
+                <td></td>
+            </tr>
+            @foreach (Post singolo in tutti.OrderByDescending(i => i.Id))
+            {
+                // OrderByDescending serve a ordinare i post dal più recente al meno recente
+            <tr>
+                <td>@singolo.Utente</td>
+                @if (singolo.Modificato)
+                {
+                    <td><i>Modificato</i> @singolo.Data</td>
+                }
+                else
+                {
+                    <td>@singolo.Data</td>
+                }
+                <td>@singolo.Contenuto</td>
+                <td>
+                    <button class="btn btn-primary" type="button" @onclick="(e => OnModifica(singolo))"><span class="oi oi-pencil" style="color: white; text-align: center"></span></button>
+                </td>
+                <td>
+                    <button class="btn btn-danger" type="button" @onclick="(e => OnCancella(singolo))"><span class="oi oi-trash" style="color: white; text-align: center"></span></button>
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Aggiungi un post inserendo il tuo nome </p>
+    <EditForm Model="@attuale" OnValidSubmit="@(e => OnSalva(attuale))">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="form-group">
+            <label for="utente-post">Nome utente</label>
+            <InputText id="utente-post" @bind-Value="attuale.Utente" class="form-control" placeholder="Come ti chiami?" />
+        </div>
+        <div class="form-group">
+            <label for="contenuto-post">Contenuto</label>
+            <InputText id="contenuto-post" @bind-Value="attuale.Contenuto" class="form-control" placeholder="A cosa stai pensando?" />
+        </div>
+        <button class="oi oi-check btn btn-primary"></button>
+        <button type="reset" class="oi oi-x btn btn-secondary" @onclick="OnAnnulla"></button>
+        <br />
+    </EditForm>
+}
+
+
+
+@code {
+
+    public List<Post> tutti = Inizializza();
+
+    public Post attuale;
+
+
+    public void OnModifica(Post selezionato)
+    {
+        attuale = new Post();
+
+        attuale.Id = selezionato.Id;
+        attuale.Utente = selezionato.Utente;
+        attuale.Contenuto = selezionato.Contenuto;
+        attuale.Data = DateTime.Now;
+        attuale.Modificato = true;
+    }
+
+
+    public void OnCancella(Post selezionato)
+    {
+        Post daCancellare = tutti.Single(singolo => singolo.Id == selezionato.Id);
+        tutti.Remove(daCancellare);
+        Salva();
+    }
+
+
+    public void OnNuovo()
+    {
+        attuale = new Post();
+    }
+
+
+    public void OnAnnulla()
+    {
+        attuale = null;
+    }
+
+
+    public void OnSalva(Post modificato)
+    {
+        if (modificato.Id == 0)
+        {
+            if (tutti.Count > 0)
+            {
+                modificato.Id = tutti.Max(singolo => singolo.Id) + 1;
+            }
+            else
+            {
+                modificato.Id = 1;
+            }
+            tutti.Add(modificato);
+        }
+        else
+        {
+            Post inlista = tutti.Single(old => old.Id == modificato.Id);
+
+            inlista.Utente = modificato.Utente;
+            inlista.Contenuto = modificato.Contenuto;
+            inlista.Data = DateTime.Now;
+            inlista.Modificato = true;
+        }
+        Salva();
+    }
+
+
+    static public List<Post> Inizializza()
+    {
+        if (File.Exists("faceict_posts.json"))
+        {
+            string buffer = File.ReadAllText("faceict_posts.json");
+
+            return JsonConvert.DeserializeObject<List<Post>>(buffer);
+        }
+
+        return new List<Post>();
+    }
+
+
+    public void Salva()
+    {
+        string trasformato = JsonConvert.SerializeObject(tutti);
+        File.WriteAllText("faceict_posts.json", trasformato);
+        attuale = null;
+    }
+}
+
